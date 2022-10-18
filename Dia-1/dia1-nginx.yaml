@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: dia1-nginx
+  name: dia1-nginx
+  namespace: dia1
+spec:
+  containers:
+  - image: nginx
+    name: dia1-nginx
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

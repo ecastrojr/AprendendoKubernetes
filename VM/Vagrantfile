@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
   (1..NODE_COUNT).each do |i|
     config.vm.define "worker#{i}" do |subconfig|
       subconfig.vm.box = "ubuntu/jammy64"
-      subconfig.vm.hostname = "Node#{i}"
+      subconfig.vm.hostname = "worker#{i}"
       subconfig.vm.network "public_network", bridge: "wlp5s0"
       subconfig.vm.synced_folder "/home/alexcastro/Documentos/Aprendendo/AprendendoKubernetes", "/data"
     end
@@ -22,6 +22,7 @@ Vagrant.configure("2") do |config|
   end
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update && apt-get upgrade -y
+    apt install -y cloud-init linux-headers-generic linux-headers-virtual linux-virtual
     curl -fsSL https://get.docker.com | bash
   SHELL
 end

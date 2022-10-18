@@ -1,17 +1,17 @@
-NODE_COUNT = 0
+NODE_COUNT = 2
 
 Vagrant.configure("2") do |config|
   config.vm.define "manager" do |subconfig|
-    subconfig.vm.box = "ubuntu/jammy64"
+    subconfig.vm.box = "ubuntu/focal64"
     subconfig.vm.hostname = "Manager"
-    subconfig.vm.network "public_network", bridge: "wlp5s0"
+    subconfig.vm.network "public_network", bridge: "wlp5s0", ip: "192.168.0.10"
     subconfig.vm.synced_folder "/home/alexcastro/Documentos/Aprendendo/AprendendoKubernetes", "/data"
   end
   (1..NODE_COUNT).each do |i|
     config.vm.define "worker#{i}" do |subconfig|
-      subconfig.vm.box = "ubuntu/jammy64"
-      subconfig.vm.hostname = "Node#{i}"
-      subconfig.vm.network "public_network", bridge: "wlp5s0"
+      subconfig.vm.box = "ubuntu/focal64"
+      subconfig.vm.hostname = "worker#{i}"
+      subconfig.vm.network "public_network", bridge: "wlp5s0", ip: "192.168.0.1#{i}"
       subconfig.vm.synced_folder "/home/alexcastro/Documentos/Aprendendo/AprendendoKubernetes", "/data"
     end
   end
@@ -21,7 +21,46 @@ Vagrant.configure("2") do |config|
     vb.cpus = 2
   end
   config.vm.provision "shell", inline: <<-SHELL
-    apt-get update && apt-get upgrade -y
-    curl -fsSL https://get.docker.com | bash
+    apt-get update && apt-get full-upgrade -y
+    swapoff -a
+    sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+    # Instalando kubelet, kubeadm e kubectl
+    apt-get install curl apt-transport-https -y
+    curl -fsSL  https://packages.cloud.google.com/apt/doc/apt-key.gpg|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/k8s.gpg
+    echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
+    apt-get update && apt-get install wget vim git kubelet kubeadm kubectl -y
+    apt-mark hold kubelet kubeadm kubectl
+    echo "ip_vs" >> /etc/modules-load.d/containerd.conf
+    echo "ip_vs_rr" >> /etc/modules-load.d/containerd.conf
+    echo "ip_vs_sh" >> /etc/modules-load.d/containerd.conf
+    echo "ip_vs_wrr" >> /etc/modules-load.d/containerd.conf
+    echo "nf_conntrack_ipv4" >> /etc/modules-load.d/containerd.conf
+    echo "overlay" >> /etc/modules-load.d/containerd.conf
+    echo "br_netfilter" >> /etc/modules-load.d/containerd.conf
+    modprobe overlay
+    modprobe br_netfilter
+    echo "net.bridge.bridge-nf-call-ip6tables = 1">> /etc/sysctl.d/kubernetes.conf
+    echo "net.bridge.bridge-nf-call-iptables = 1">> /etc/sysctl.d/kubernetes.conf
+    echo "net.ipv4.ip_forward = 1">> /etc/sysctl.d/kubernetes.conf
+    sysctl --system
+    apt-get update && apt-get install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    apt-get update && apt-get install -y containerd.io
+    mkdir -p /etc/containerd
+    containerd config default > /etc/containerd/config.toml
+    sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+    systemctl restart containerd
+    systemctl enable containerd
+    systemctl enable kubelet
+    echo "192.168.0.10 manager" >> /etc/hosts
+    echo "192.168.0.11 worker1" >> /etc/hosts
+    echo "192.168.0.12 worker2" >> /etc/hosts
+  #  kubeadm config images pull --cri-socket unix:///var/run/containerd/containerd.sock
+  #  kubeadm init \
+  #--cri-socket /run/containerd/containerd.sock \
+  #--upload-certs \
+  #--control-plane-endpoint=manager
+    [ -f /var/run/reboot-required ] && sudo reboot -f
   SHELL
 end
