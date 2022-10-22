@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-v2
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  replicas: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 3
+  template:
+    metadata:
+      labels:
+        app: myapp
+        version: "2.0.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "32111"
+    spec:
+      containers:
+      - name: myapp
+        image: linuxtips/nginx-prometheus-exporter:2.0.0
+        env:
+        - name: VERSION
+          value: "2.0.0"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: "500m"
+          requests:
+            memory: 64Mi
+            cpu: "10m"
+        ports:
+        - containerPort: 80
+        - containerPort: 32111
