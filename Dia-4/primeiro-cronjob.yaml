@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: job-cron
+spec:
+  schedule: "*/1 * * * *"  # de 1 em 1 minuto
+  #minutos hora dia mes dia-da-semana comando
+  #
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: pod-job-cron
+            image: busybox
+            args:
+            - /bin/sh
+            - -c
+            - date; echo Chera rola rapá ; sleep 30
+          restartPolicy: OnFailure
