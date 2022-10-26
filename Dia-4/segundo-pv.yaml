@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: primeiro-pv
+  name: segundo-pv
 spec:
   capacity:
     storage: 30Gi
@@ -9,6 +9,6 @@ spec:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    path: /opt/dados1
+    path: /opt/dados2
     server: 10.0.0.10
     readOnly: false
