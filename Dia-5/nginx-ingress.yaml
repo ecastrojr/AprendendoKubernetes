@@ -9,7 +9,11 @@ spec:
   - host: meuk8s.com
     http:
       paths:
-      - backend:
-          serviceName: nginx-ingress
-          servicePort: 18080
-        patch: /nginx_status
+      - path: /nginx_status
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-ingress
+            port:
+              number: 18080
+        

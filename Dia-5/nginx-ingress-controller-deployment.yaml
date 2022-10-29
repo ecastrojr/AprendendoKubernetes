@@ -17,20 +17,20 @@ spec:
       serviceAccount: nginx
       containers:
         - name: nginx-ingress-controller
-          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.33.0
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.9.0
           imagePullPolicy: Always
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 10254
-              scheme: HTTP
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 10254
-              scheme: HTTP
-            initialDelaySeconds: 10
-            timeoutSeconds: 5
+          #readinessProbe:
+          #  httpGet:
+          #    path: /healthz
+          #    port: 10254
+          #    scheme: HTTP
+          #livenessProbe:
+          #  httpGet:
+          #    path: /healthz
+          #    port: 10254
+          #    scheme: HTTP
+          #  initialDelaySeconds: 10
+          #  timeoutSeconds: 5
           args:
             - /nginx-ingress-controller
             - --default-backend-service=ingress/default-backend

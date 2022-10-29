@@ -11,11 +11,18 @@ spec:
   - host: meuk8s.com
     http:
       paths:
-      - backend:
-          serviceName: appsvc1
-          servicePort: 80
-        patch: /app1
-      - backend:
-          serviceName: appsvc2
-          servicePort: 80
-        patch: /app2
+      - path: /app1
+        pathType: Prefix
+        backend:
+          service:
+            name: appsvc1
+            port:
+              number: 80
+      - path: /app2
+        pathType: Prefix  
+        backend:
+          service:
+            name: appsvc2
+            port:
+              number: 80
+        
