@@ -1,0 +1,19 @@
+# this config file contains all config fields with comments
+# NOTE: this is not a particularly useful config file
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+# patch the generated kubeadm config with some extra settings
+# 1 control plane node and 3 workers
+nodes:
+# the control plane node config
+- role: control-plane
+  image: kindest/node:v1.21.14@sha256:9d9eb5fb26b4fbc0c6d95fa8c790414f9750dd583f5d7cee45d92e8c26670aa1
+
+# the three workers
+- role: worker
+  image: kindest/node:v1.21.14@sha256:9d9eb5fb26b4fbc0c6d95fa8c790414f9750dd583f5d7cee45d92e8c26670aa1
+- role: worker
+  image: kindest/node:v1.21.14@sha256:9d9eb5fb26b4fbc0c6d95fa8c790414f9750dd583f5d7cee45d92e8c26670aa1
+- role: worker
+  image: kindest/node:v1.21.14@sha256:9d9eb5fb26b4fbc0c6d95fa8c790414f9750dd583f5d7cee45d92e8c26670aa1
+
